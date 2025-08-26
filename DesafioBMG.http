@@ -1,6 +1,81 @@
-@DesafioBMG_HostAddress = http://localhost:5196
+﻿@OrderAPI_HostAddress = http://localhost:5000
+@AdminEmail = admin@bmg.com
+@AdminPassword = admin123
+@UserEmail = cliente@bmg.com
+@UserPassword = cliente123
+@AdminToken =
+@UserToken =
+@ProductId =
+@OrderId =
 
-GET {{DesafioBMG_HostAddress}}/weatherforecast/
+############################################################
+### 🔑 LOGIN ADMIN
+POST {{OrderAPI_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{AdminEmail}}",
+  "password": "{{AdminPassword}}"
+}
+
+# Copiar o token retornado para {{AdminToken}} e colocar no Authorization Bearer
+
+############################################################
+### ➕ CRIAR PRODUTO (ADMIN)
+POST {{OrderAPI_HostAddress}}/api/products
+Content-Type: application/json
+Authorization: Bearer {{AdminToken}}
+
+{
+  "name": "Produto 1",
+  "price": 50,
+  "stock": 100
+}
+
+# Copiar o Id do produto retornado para {{ProductId}}
+
+############################################################
+### 🔑 LOGIN USER
+POST {{OrderAPI_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{UserEmail}}",
+  "password": "{{UserPassword}}"
+}
+
+# Copiar o token retornado para {{UserToken}} e colocar no Authorization Bearer
+
+############################################################
+### ➕ CRIAR PEDIDO (USER)
+POST {{OrderAPI_HostAddress}}/api/orders
+Content-Type: application/json
+Authorization: Bearer {{UserToken}}
+
+{
+  "items": [
+    {
+      "productId": "{{ProductId}}",
+      "quantity": 2
+    }
+  ]
+}
+
+# Copiar o Id do pedido retornado para {{OrderId}}
+
+############################################################
+### 💳 PAGAR PEDIDO (USER)
+POST {{OrderAPI_HostAddress}}/api/orders/{{OrderId}}/pay?method=Pix
+Authorization: Bearer {{UserToken}}
+
+############################################################
+### 🔍 LISTAR HISTÓRICO DE PEDIDOS (USER)
+GET {{OrderAPI_HostAddress}}/api/orders
 Accept: application/json
+Authorization: Bearer {{UserToken}}
 
-###
+############################################################
+### 🔍 LISTAR PRODUTOS (ADMIN ou USER)
+GET {{OrderAPI_HostAddress}}/api/products
+Accept: application/json
+Authorization: Bearer {{AdminToken}}  # ou {{UserToken}}
